@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "types": ["node", "amqplib"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}

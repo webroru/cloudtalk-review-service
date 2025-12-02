@@ -1,0 +1,13 @@
+services:
+  nodejs:
+    image: "node:20-alpine"
+    working_dir: /home/node/app
+    networks:
+      - cloudtalk-product-service_default
+      - default
+    volumes:
+      - ./:/home/node/app
+
+networks:
+  cloudtalk-product-service_default:
+    external: true
