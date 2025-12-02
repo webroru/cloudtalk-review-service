@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { RatingService } from './rating.service';
 import { connect, Channel } from 'amqplib';
+import { amqpConfig } from './config/amqp.config';
 
 @Injectable()
 export class ReviewConsumer implements OnModuleInit {
@@ -10,18 +11,17 @@ export class ReviewConsumer implements OnModuleInit {
     constructor(private ratingService: RatingService) {}
 
     async onModuleInit() {
-        const connection = await connect(process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq:5672');
+        const connection = await connect(amqpConfig.host);
         this.channel = await connection.createChannel();
 
-        const queueName = process.env.QUEUE_NAME || 'messages';
+        const queueName = amqpConfig.queue;
         await this.channel.assertQueue(queueName, { durable: true });
 
         this.logger.log(`Listening on queue: ${queueName}`);
 
-        const prefetch = parseInt(process.env.CONCURRENCY || '8', 10);
-        await this.channel.prefetch(prefetch);
+        await this.channel.prefetch(amqpConfig.concurrency);
 
-        this.channel.consume(
+        await this.channel.consume(
             queueName,
             async (msg) => {
                 if (!msg) return;
@@ -39,7 +39,7 @@ export class ReviewConsumer implements OnModuleInit {
                     this.channel.ack(msg);
                 } catch (err) {
                     this.logger.error('Failed to process message', err);
-                    this.channel.nack(msg, false, false); // DLQ
+                    this.channel.nack(msg, false, false);
                 }
             },
             { noAck: false },

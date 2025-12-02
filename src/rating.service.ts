@@ -3,10 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Rating } from './rating.entity';
 import { Repository } from 'typeorm';
 import Redis from 'ioredis';
+import { redisConfig } from './config/redis.config';
 
 @Injectable()
 export class RatingService {
-    private redis = new Redis({ host: 'redis' });
+    private redis = new Redis(redisConfig);
 
     constructor(
         @InjectRepository(Rating)
