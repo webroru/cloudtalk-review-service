@@ -11,15 +11,11 @@ This project uses `docker-compose` to setup the development environment.
    git clone <repository-url>
    cd <repository-directory>
    ```
-2. Build and start the containers:
-   ```bash
-    docker-compose up -d --build
-    ```
-3. Build dependencies inside the nodejs container:
+2. Build dependencies inside the nodejs container:
    ```bash
    docker-compose run --rm nodejs npm install
    ```
-4. Run migrations inside the nodejs container:
+3. Run migrations inside the nodejs container:
    ```bash
    docker-compose run --rm nodejs npm run migration:run -- -d ./data-source.ts
    ```
