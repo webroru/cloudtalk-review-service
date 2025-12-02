@@ -10,16 +10,14 @@ export class ReviewConsumer implements OnModuleInit {
     constructor(private ratingService: RatingService) {}
 
     async onModuleInit() {
-        // Подключение к RabbitMQ
         const connection = await connect(process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq:5672');
         this.channel = await connection.createChannel();
 
-        const queueName = process.env.QUEUE_NAME || 'reviews_queue';
+        const queueName = process.env.QUEUE_NAME || 'messages';
         await this.channel.assertQueue(queueName, { durable: true });
 
         this.logger.log(`Listening on queue: ${queueName}`);
 
-        // Ограничение на количество параллельных сообщений
         const prefetch = parseInt(process.env.CONCURRENCY || '8', 10);
         await this.channel.prefetch(prefetch);
 
@@ -61,7 +59,6 @@ export class ReviewConsumer implements OnModuleInit {
                 break;
 
             case 'App\\Domain\\Review\\Event\\ReviewUpdatedEvent':
-                // Для обновления нам нужно знать старый рейтинг
                 await this.ratingService.deleteReview(payload.productId, payload.oldRating);
                 await this.ratingService.updateRating(payload.productId, payload.newRating);
                 this.logger.log(`Processed ReviewUpdatedEvent for product ${payload.productId}`);

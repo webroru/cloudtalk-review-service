@@ -32,7 +32,7 @@ export class RatingService {
 
         await this.repo.save(record);
         await this.redis.set(
-            `product_rating:${productId}`,
+            `product_rating_${productId}`,
             JSON.stringify(record),
         );
     }
@@ -43,7 +43,7 @@ export class RatingService {
 
         if (record.reviewsCount <= 1) {
             await this.repo.delete(productId);
-            await this.redis.del(`product_rating:${productId}`);
+            await this.redis.del(`product_rating_${productId}`);
             return;
         }
 
@@ -55,7 +55,7 @@ export class RatingService {
 
         await this.repo.save(record);
         await this.redis.set(
-            `product_rating:${productId}`,
+            `product_rating_${productId}`,
             JSON.stringify(record),
         );
     }
