@@ -23,3 +23,9 @@ This project uses `docker-compose` to setup the development environment.
    ```bash
    docker-compose run --rm nodejs npm run migration:run -- -d ./data-source.ts
    ```
+
+## Running the services
+- To start the Node.js service:
+  ```bash
+  docker-compose run nodejs npm run start:consumer
+  ```
