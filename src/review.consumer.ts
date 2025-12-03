@@ -1,7 +1,7 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { RatingService } from './rating.service';
-import { connect, Channel } from 'amqplib';
-import { amqpConfig } from './config/amqp.config';
+import {Injectable, Logger, OnModuleInit} from '@nestjs/common';
+import {RatingService} from './rating.service';
+import {Channel, connect} from 'amqplib';
+import {amqpConfig} from './config/amqp.config';
 
 @Injectable()
 export class ReviewConsumer implements OnModuleInit {
@@ -11,7 +11,7 @@ export class ReviewConsumer implements OnModuleInit {
     constructor(private ratingService: RatingService) {}
 
     async onModuleInit() {
-        const connection = await connect(amqpConfig.host);
+        const connection = await this.connectRabbit(amqpConfig.host);
         this.channel = await connection.createChannel();
 
         const queueName = amqpConfig.queue;
@@ -44,6 +44,18 @@ export class ReviewConsumer implements OnModuleInit {
             },
             { noAck: false },
         );
+    }
+
+    private async connectRabbit(host: string) {
+        for (let i = 0; i < 10; i++) {
+            try {
+                return await connect(host);
+            } catch (err) {
+                console.log('RabbitMQ not ready, retry in 2s');
+                await new Promise(res => setTimeout(res, 2000));
+            }
+        }
+        throw new Error('Cannot connect to RabbitMQ');
     }
 
     private async handleEvent(payload: any, type: string) {
